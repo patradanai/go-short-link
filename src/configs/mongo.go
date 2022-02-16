@@ -10,7 +10,7 @@ import (
 )
 
 
-func ConectToMongo() (*mongo.Client , error) {
+func ConectToMongo() (*mongo.Client , context.Context,error) {
 	fmt.Print(loadEnv("MONGO_DB"))
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -21,5 +21,5 @@ func ConectToMongo() (*mongo.Client , error) {
 
 	fmt.Printf("DATABASE CONNECTed")
 
-	return client,nil
+	return client,ctx,nil
 }

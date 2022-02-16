@@ -23,17 +23,19 @@ func initialRouter(c *gin.Engine){
 
 
 func main() {
-	client,_ :=  configs.ConectToMongo()
+	client,ctx,_ :=  configs.ConectToMongo()
 
 	r := gin.Default()
 
 	// Middlewares
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	r.Use(middlewares.MongoInjection(client))
+	r.Use(middlewares.MongoInjection(client,ctx))
 
 	// Initial Router
 	initialRouter(r)
+
+
 
 	fmt.Println("Running App on PORT")
 
