@@ -22,6 +22,7 @@ type User struct {
 	Id           primitive.ObjectID `bson:"_id"`
 	Username     string             `bson:"username"`
 	Password     string             `bson:"password"`
+	Email        string             `bson:"email"`
 	IsOnline     bool               `bson:"is_online"`
 	Status       bool               `bson:"status"`
 	LoginAttempt int                `bson:"login_attempt"`

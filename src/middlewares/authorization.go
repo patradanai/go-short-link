@@ -14,7 +14,7 @@ type AuthHeader struct {
 	Token string `header:"Authorization"`
 }
 
-func Authentication() gin.HandlerFunc {
+func Authorization() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		headerAuth := AuthHeader{}
 

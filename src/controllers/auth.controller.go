@@ -83,8 +83,7 @@ func Authentication(c *gin.Context) {
 	getUUid := uuid.New() // Generate Refresh Token
 
 	refreshModel := models.RefreshToken{UserId: userArray[0].Id, RefreshToken: getUUid.String(), ExpiredAt: time.Now().AddDate(0, 1, 0), CreatedAt: time.Now(), UpdatedAt: time.Now(), Revoke: false} // Insert Document
-	_, err = refreshTokenCollection.InsertOne(ctx, refreshModel)
-	if err != nil {
+	if _, err := refreshTokenCollection.InsertOne(ctx, refreshModel); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Something went wrong"})
 		return
 	}
@@ -148,4 +147,36 @@ func RefreshToken(c *gin.Context) {
 	// Return Token
 	c.JSON(http.StatusAccepted, gin.H{"success": true, "message": "authenticaion completed", "data": data})
 
+}
+
+type RegisterRequestBody struct {
+	Username string `bson:"username"`
+	Password string `bson:"password"`
+	Email    string `bson:"email"`
+}
+
+func RegisterUser(c *gin.Context) {
+	// Assertion Type .(*mongo.Client)
+	userCollection := c.MustGet("mongoClient").(*mongo.Client).Database(configs.LoadEnv("MONGO_DB_NAME")).Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	requestBody := RegisterRequestBody{}
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+
+	//////////////////////////////////////////////////////////
+	//    				Insert One Document              	//
+	//////////////////////////////////////////////////////////
+
+	encryptPwd, _ := utils.EncryptBcrypt(requestBody.Password)
+	userModel := models.User{Username: requestBody.Username, Password: encryptPwd, Email: requestBody.Email}
+	if _, err := userCollection.InsertOne(ctx, userModel); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Something went wrong"})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"success": true, "message": "created user success"})
 }
