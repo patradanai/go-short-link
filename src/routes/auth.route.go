@@ -6,6 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthRoutes (r *gin.RouterGroup) {
-	r.POST("/signin",controllers.Authentication)
+func AuthRoutes(r *gin.RouterGroup) {
+	r.POST("/signup")
+	r.POST("/signin", controllers.Authentication)
+	r.POST("/signout")
+	r.POST("/refresh", controllers.RefreshToken)
 }

@@ -9,17 +9,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-
-func ConectToMongo() (*mongo.Client , context.Context,error) {
-	fmt.Print(loadEnv("MONGO_DB"))
+func ConectToMongo() (*mongo.Client, error) {
+	fmt.Print(LoadEnv("MONGO_DB"))
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(loadEnv("MONGO_DB")))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(LoadEnv("MONGO_DB")))
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("DATABASE CONNECTed")
+	fmt.Printf("DATABASE CONNECTED")
 
-	return client,ctx,nil
+	return client, nil
 }

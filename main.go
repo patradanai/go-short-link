@@ -23,14 +23,14 @@ func initialRouter(c *gin.Engine){
 
 
 func main() {
-	client,ctx,_ :=  configs.ConectToMongo()
+	client,_ :=  configs.ConectToMongo()
 
 	r := gin.Default()
 
 	// Middlewares
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	r.Use(middlewares.MongoInjection(client,ctx))
+	r.Use(middlewares.MongoInjection(client))
 
 	// Initial Router
 	initialRouter(r)

@@ -18,7 +18,7 @@ func EncryptBcrypt (raw string) (string,error) {
 
 }
 
-func DecryptBcrypt (hashPwd string,plainPwd string) bool {
+func DecryptBcrypt (hashPwd string,plainPwd string) error {
 	byteHash := []byte(hashPwd)
 	bytePlain := []byte(plainPwd)
 
@@ -26,8 +26,8 @@ func DecryptBcrypt (hashPwd string,plainPwd string) bool {
 
 	if err != nil {
 		fmt.Println(err)
-		return false
+		return err
 	}
 
-	return true
+	return nil
 }
