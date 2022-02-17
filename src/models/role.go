@@ -8,6 +8,7 @@ import (
 
 type Role struct {
 	Id          primitive.ObjectID `bson:"_id"`
+	Permissions []Permission       `bson:"permissions"`
 	Name        string             `bson:"name"`
 	Description string             `bson:"description"`
 	CreatedAt   time.Time          `bson:"created_at"`
