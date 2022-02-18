@@ -7,12 +7,12 @@ import (
 )
 
 type ShortLink struct {
-	Id          primitive.ObjectID `bson:"_id"`
+	Id          primitive.ObjectID `bson:"_id,omitempty"`
 	UserId      primitive.ObjectID `bson:"user_id"`
-	RefCode     string             `bson:"ref_code"`
-	OriginalUrl string             `bson:"original_url"`
-	ShortUrl    string             `bson:"short_url"`
-	ExpiredAt   time.Time          `bson:"expired_at"`
-	CreatedAt   time.Time          `bson:"created_at"`
-	UpdatedAt   time.Time          `bson:"updated_at"`
+	RefCode     string             `bson:"ref_code,omitempty"`
+	OriginalUrl string             `bson:"original_url,omitempty"`
+	ShortUrl    string             `bson:"short_url,omitempty"`
+	ExpiredAt   time.Time          `bson:"expired_at,omitempty"`
+	CreatedAt   time.Time          `bson:"created_at,omitempty"`
+	UpdatedAt   time.Time          `bson:"updated_at,omitempty"`
 }

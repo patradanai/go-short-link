@@ -1,9 +1,13 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	"tiddly/src/controllers"
+
+	"github.com/gin-gonic/gin"
+)
 
 func LinkRoutes(r *gin.RouterGroup) {
-	r.POST("/create-link")
+	r.POST("/create-link", controllers.CreateLink)
 
-	r.GET("/:referenceId")
+	r.GET("/:shortId", controllers.RedirectLink)
 }
