@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"context"
 	"net/http"
 	"tiddly/src/configs"
 	"tiddly/src/models"
+	"tiddly/src/repositories"
 	"tiddly/src/utils"
 	"time"
 
@@ -14,18 +14,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type CreateLinkRequest struct {
+type createLinkRequest struct {
 	Destination string `json:"destination"`
 	Title       string `json:"title"`
 	SlagTag     string `json:"slag_tag"`
 }
 
 func CreateLink(c *gin.Context) {
-	shortLinkCollection := c.MustGet("mongoClient").(*mongo.Client).Database(configs.LoadEnv("MONGO_DB_NAME")).Collection("shortlinks")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	mongoClient := c.MustGet("mongoClient").(*mongo.Client)
+	linkRepository := repositories.LinkRepository(mongoClient)
 
-	shortLinkReq := CreateLinkRequest{}
+	shortLinkReq := createLinkRequest{}
 
 	if err := c.ShouldBindJSON(&shortLinkReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
@@ -46,13 +45,12 @@ func CreateLink(c *gin.Context) {
 	}
 	// Check Long Url
 	filter := bson.M{"original_url": shortLinkReq.Destination}
-	result := models.ShortLink{}
-	if err := shortLinkCollection.FindOne(ctx, filter).Decode(&result); err == nil {
+	if getFindLink, err := linkRepository.GetLink(filter); err == nil {
 		data := map[string]string{
-			"title":       result.Title,
-			"shortUrl":    result.ShortUrl,
-			"originalUrl": result.OriginalUrl,
-			"expiredAt":   result.ExpiredAt.String(),
+			"title":       getFindLink.Title,
+			"shortUrl":    getFindLink.ShortUrl,
+			"originalUrl": getFindLink.OriginalUrl,
+			"expiredAt":   getFindLink.ExpiredAt.String(),
 		}
 
 		// Response
@@ -62,7 +60,8 @@ func CreateLink(c *gin.Context) {
 	// Insert to db
 	shortUrl := configs.LoadEnv("BASE_URL") + "/" + uniqueCode
 	shortLinkModel := models.ShortLink{Title: shortLinkReq.Title, OriginalUrl: shortLinkReq.Destination, RefCode: uniqueCode, ShortUrl: shortUrl, CreatedAt: time.Now(), UpdatedAt: time.Now()}
-	if _, err := shortLinkCollection.InsertOne(ctx, shortLinkModel); err != nil {
+	_, err = linkRepository.CreateLink(shortLinkModel)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Something went wrong"})
 		return
 	}
@@ -77,25 +76,16 @@ func CreateLink(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{"success": true, "message": "created completed short url", "data": data})
 }
 
-type Params struct {
-	ShortRefId string `uri:"shortId"`
-}
-
 func RedirectLink(c *gin.Context) {
-	shortLinkCollection := c.MustGet("mongoClient").(*mongo.Client).Database(configs.LoadEnv("MONGO_DB_NAME")).Collection("shortlinks")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	mongoClient := c.MustGet("mongoClient").(*mongo.Client)
 
-	shortId := Params{}
+	linkRepository := repositories.LinkRepository(mongoClient)
 
-	if err := c.BindUri(&shortId); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": true, "message": err.Error()})
-		return
-	}
+	shortId := c.Param("shortId")
 
-	filter := bson.M{"ref_code": shortId.ShortRefId}
-	result := models.ShortLink{}
-	if err := shortLinkCollection.FindOne(ctx, filter).Decode(&result); err != nil {
+	filter := bson.M{"ref_code": shortId}
+	result, err := linkRepository.GetLink(filter)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": true, "message": err.Error()})
 		return
 	}

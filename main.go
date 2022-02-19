@@ -18,6 +18,7 @@ func initialRouter(c *gin.Engine) {
 	v1 := c.Group("/api/v1")
 	routes.AuthRoutes(v1.Group("/auth"))
 	routes.LinkRoutes(v1.Group("/link"))
+	routes.RoleRoutes(v1.Group("/role"))
 
 }
 

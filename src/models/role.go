@@ -7,10 +7,10 @@ import (
 )
 
 type Role struct {
-	Id          primitive.ObjectID `bson:"_id"`
-	Permissions []Permission       `bson:"permissions"`
-	Name        string             `bson:"name"`
-	Description string             `bson:"description"`
-	CreatedAt   time.Time          `bson:"created_at"`
-	UpdatedAt   time.Time          `bson:"updated_at"`
+	Id          primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Permissions []Permission       `bson:"permissions" json:"permissions"`
+	Name        string             `bson:"name,omitempty" json:"name,omitempty"`
+	Description string             `bson:"description,omitempty" json:"description,omitempty"`
+	CreatedAt   time.Time          `bson:"created_at,omitempty" json:"created_at,omitempty"`
+	UpdatedAt   time.Time          `bson:"updated_at,omitempty" json:"updated_at,omitempty"`
 }
