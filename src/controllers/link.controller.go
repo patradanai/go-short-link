@@ -14,17 +14,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type createLinkRequest struct {
-	Destination string `json:"destination"`
-	Title       string `json:"title"`
-	SlagTag     string `json:"slag_tag"`
-}
-
 func CreateLink(c *gin.Context) {
 	mongoClient := c.MustGet("mongoClient").(*mongo.Client)
 	linkRepository := repositories.LinkRepository(mongoClient)
 
-	shortLinkReq := createLinkRequest{}
+	shortLinkReq := models.ShortLink{}
 
 	if err := c.ShouldBindJSON(&shortLinkReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
@@ -32,7 +26,7 @@ func CreateLink(c *gin.Context) {
 	}
 
 	// Validate URl
-	if err := utils.ValidateUrl(shortLinkReq.Destination); err != nil {
+	if err := utils.ValidateUrl(shortLinkReq.OriginalUrl); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": true, "message": "url is invalid format"})
 		return
 	}
@@ -44,7 +38,7 @@ func CreateLink(c *gin.Context) {
 		return
 	}
 	// Check Long Url
-	filter := bson.M{"original_url": shortLinkReq.Destination}
+	filter := bson.M{"original_url": shortLinkReq.OriginalUrl}
 	if getFindLink, err := linkRepository.GetLink(filter); err == nil {
 		data := map[string]string{
 			"title":       getFindLink.Title,
@@ -59,7 +53,7 @@ func CreateLink(c *gin.Context) {
 	}
 	// Insert to db
 	shortUrl := configs.LoadEnv("BASE_URL") + "/" + uniqueCode
-	shortLinkModel := models.ShortLink{Title: shortLinkReq.Title, OriginalUrl: shortLinkReq.Destination, RefCode: uniqueCode, ShortUrl: shortUrl, CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	shortLinkModel := models.ShortLink{Title: shortLinkReq.Title, OriginalUrl: shortLinkReq.OriginalUrl, RefCode: uniqueCode, ShortUrl: shortUrl, CreatedAt: time.Now(), UpdatedAt: time.Now()}
 	_, err = linkRepository.CreateLink(shortLinkModel)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Something went wrong"})

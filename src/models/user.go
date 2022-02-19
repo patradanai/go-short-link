@@ -19,15 +19,15 @@ type userInfo struct {
 }
 
 type User struct {
-	Id           primitive.ObjectID `bson:"_id"`
-	Username     string             `bson:"username"`
-	Password     string             `bson:"password"`
-	Email        string             `bson:"email"`
-	IsOnline     bool               `bson:"is_online"`
-	Status       bool               `bson:"status"`
-	LoginAttempt int                `bson:"login_attempt"`
-	UserInfo     userInfo           `bson:"user_info"`
-	Roles        []Role             `bson:"role_id"`
-	CreatedAt    time.Time          `bson:"created_at"`
-	UpdatedAt    time.Time          `bson:"updated_at"`
+	Id           primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Username     string             `bson:"username,omitempty" json:"username,omitempty"`
+	Password     string             `bson:"password,omitempty" json:"password,omitempty"`
+	Email        string             `bson:"email,omitempty" json:"email,omitempty"`
+	IsOnline     bool               `bson:"is_online" json:"is_online,omitempty"`
+	Status       bool               `bson:"status" json:"status,omitempty"`
+	LoginAttempt int                `bson:"login_attempt,omitempty" json:"login_attempt,omitempty"`
+	UserInfo     userInfo           `bson:"user_info" json:"user_info,omitempty"`
+	Roles        []Role             `bson:"role_id" json:"role_id,omitempty"`
+	CreatedAt    time.Time          `bson:"created_at,omitempty" json:"created_at,omitempty"`
+	UpdatedAt    time.Time          `bson:"updated_at,omitempty" json:"updated_at,omitempty"`
 }

@@ -63,19 +63,13 @@ func RefreshToken(c *gin.Context) {
 
 }
 
-type registerRequestBody struct {
-	Username string `bson:"username"`
-	Password string `bson:"password"`
-	Email    string `bson:"email"`
-}
-
 func RegisterUser(c *gin.Context) {
 	// Assertion Type .(*mongo.Client)
 	userCollection := c.MustGet("mongoClient").(*mongo.Client).Database(configs.LoadEnv("MONGO_DB_NAME")).Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	requestBody := registerRequestBody{}
+	requestBody := models.User{}
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
 		return
