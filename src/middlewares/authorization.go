@@ -10,13 +10,13 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-type AuthHeader struct {
+type authHeader struct {
 	Token string `header:"Authorization"`
 }
 
 func Authorization() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		headerAuth := AuthHeader{}
+		headerAuth := authHeader{}
 
 		if err := c.BindHeader(&headerAuth); err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"success": false, "message": "Unauthorize"})

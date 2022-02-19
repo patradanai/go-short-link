@@ -10,6 +10,6 @@ import (
 func AuthRoutes(r *gin.RouterGroup) {
 	r.POST("/signup", controllers.RegisterUser)
 	r.POST("/signin", middlewares.Authentication())
-	r.POST("/signout")
+	r.POST("/signout", middlewares.Authorization(), controllers.LogoutUser)
 	r.POST("/refresh", controllers.RefreshToken)
 }

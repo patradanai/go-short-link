@@ -11,7 +11,10 @@ func Contains(items []string, item string) bool {
 	return false
 }
 
-func ValidateUrl(str string) bool {
-	baseUrl, err := url.Parse(str)
-	return err == nil && baseUrl.Host != "" && baseUrl.Scheme != ""
+func ValidateUrl(str string) error {
+	_, err := url.Parse(str)
+	if err != nil {
+		return err
+	}
+	return nil
 }

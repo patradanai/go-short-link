@@ -15,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type EmailRequestBody struct {
+type emailRequestBody struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
@@ -28,7 +28,7 @@ func Authentication() gin.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		requestBody := EmailRequestBody{}
+		requestBody := emailRequestBody{}
 
 		// BindJSON and Validate
 		if err := c.ShouldBindJSON(&requestBody); err != nil {

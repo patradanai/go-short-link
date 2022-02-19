@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"tiddly/src/configs"
 	"tiddly/src/models"
@@ -34,13 +33,13 @@ func CreateLink(c *gin.Context) {
 	}
 
 	// Validate URl
-	if !utils.ValidateUrl(shortLinkReq.Destination) {
+	if err := utils.ValidateUrl(shortLinkReq.Destination); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": true, "message": "url is invalid format"})
 		return
 	}
 
 	// Create Short link
-	uniqueCode, err := gonanoid.New()
+	uniqueCode, err := gonanoid.New(9)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Something went wrong"})
 		return
@@ -50,10 +49,10 @@ func CreateLink(c *gin.Context) {
 	result := models.ShortLink{}
 	if err := shortLinkCollection.FindOne(ctx, filter).Decode(&result); err == nil {
 		data := map[string]string{
-			"title":       "",
+			"title":       result.Title,
 			"shortUrl":    result.ShortUrl,
 			"originalUrl": result.OriginalUrl,
-			"expiredAt":   "",
+			"expiredAt":   result.ExpiredAt.String(),
 		}
 
 		// Response
@@ -62,16 +61,16 @@ func CreateLink(c *gin.Context) {
 	}
 	// Insert to db
 	shortUrl := configs.LoadEnv("BASE_URL") + "/" + uniqueCode
-	shortLinkModel := models.ShortLink{OriginalUrl: shortLinkReq.Destination, RefCode: uniqueCode, ShortUrl: shortUrl, CreatedAt: time.Now(), UpdatedAt: time.Now()}
+	shortLinkModel := models.ShortLink{Title: shortLinkReq.Title, OriginalUrl: shortLinkReq.Destination, RefCode: uniqueCode, ShortUrl: shortUrl, CreatedAt: time.Now(), UpdatedAt: time.Now()}
 	if _, err := shortLinkCollection.InsertOne(ctx, shortLinkModel); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Something went wrong"})
 		return
 	}
 	data := map[string]string{
-		"title":       "",
-		"shortUrl":    shortUrl,
-		"originalUrl": shortLinkReq.Destination,
-		"expiredAt":   "",
+		"title":       shortLinkModel.Title,
+		"shortUrl":    shortLinkModel.ShortUrl,
+		"originalUrl": shortLinkModel.OriginalUrl,
+		"expiredAt":   shortLinkModel.ExpiredAt.String(),
 	}
 
 	// Response
@@ -93,8 +92,6 @@ func RedirectLink(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"success": true, "message": err.Error()})
 		return
 	}
-
-	fmt.Println(shortId.ShortRefId)
 
 	filter := bson.M{"ref_code": shortId.ShortRefId}
 	result := models.ShortLink{}

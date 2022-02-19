@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type TokenRequestBody struct {
+type tokenRequestBody struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
@@ -22,7 +22,7 @@ func RefreshToken(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	tokenFromBody := TokenRequestBody{}
+	tokenFromBody := tokenRequestBody{}
 
 	if err := c.ShouldBindJSON(&tokenFromBody); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
@@ -63,7 +63,7 @@ func RefreshToken(c *gin.Context) {
 
 }
 
-type RegisterRequestBody struct {
+type registerRequestBody struct {
 	Username string `bson:"username"`
 	Password string `bson:"password"`
 	Email    string `bson:"email"`
@@ -75,7 +75,7 @@ func RegisterUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	requestBody := RegisterRequestBody{}
+	requestBody := registerRequestBody{}
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
 		return
@@ -93,4 +93,24 @@ func RegisterUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusAccepted, gin.H{"success": true, "message": "created user success"})
+}
+
+func LogoutUser(c *gin.Context) {
+	refreshTokenCollection := c.MustGet("mongoClient").(*mongo.Client).Database(configs.LoadEnv("MONGO_DB_NAME")).Collection("refreshtokens")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	refreshTokenReq := tokenRequestBody{}
+	if err := c.ShouldBindJSON(&refreshTokenReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "not found refresh_token"})
+		return
+	}
+
+	_, err := refreshTokenCollection.UpdateOne(ctx, bson.M{"refresh_token": refreshTokenReq.RefreshToken}, bson.M{"revoke": true})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"success": true, "message": "Logout success"})
 }
