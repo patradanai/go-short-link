@@ -15,10 +15,16 @@ func initialRouter(c *gin.Engine) {
 		c.String(http.StatusOK, "This is Root")
 	})
 
+	// Serve static file
+	c.Static("/public", "./public")
+
+	// Router Group
 	v1 := c.Group("/api/v1")
+
 	routes.AuthRoutes(v1.Group("/auth"))
 	routes.LinkRoutes(v1.Group("/link"))
 	routes.RoleRoutes(v1.Group("/role"))
+	routes.UserRoutes(v1.Group("/user"))
 
 }
 
