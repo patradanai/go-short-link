@@ -41,7 +41,7 @@ func SaveFileUpload(imageField string) gin.HandlerFunc {
 					return
 				}
 
-				c.Set("file", map[string]string{"filename": fileName, "path": destFile})
+				c.Set("file", map[string]string{"original": file.Filename, "filename": fileName, "path": destFile})
 
 			}
 		}
