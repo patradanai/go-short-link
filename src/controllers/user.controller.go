@@ -10,8 +10,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type fileUpload struct {
+	original string
+	filename string
+	path     string
+}
+
 func UpdateUserInfo(c *gin.Context) {
 	mongoClient := c.MustGet("mongoClient").(*mongo.Client)
+	// file := c.MustGet("file").(*fileUpload)
 	userId := c.MustGet("userId").(string)
 
 	userRepository := repositories.UserRepository(mongoClient)
