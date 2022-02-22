@@ -1,6 +1,11 @@
 package utils
 
-import "net/url"
+import (
+	"net/url"
+	"regexp"
+
+	"github.com/google/uuid"
+)
 
 func Contains(items []string, item string) bool {
 	for _, raw := range items {
@@ -17,4 +22,14 @@ func ValidateUrl(str string) error {
 		return err
 	}
 	return nil
+}
+
+func GenUUIDNoDash() string {
+
+	regex := regexp.MustCompile(`[-]`)
+	uuid := uuid.New()
+
+	uuidNoDash := regex.ReplaceAllString(uuid.String(), "")
+
+	return uuidNoDash
 }

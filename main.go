@@ -25,6 +25,7 @@ func initialRouter(c *gin.Engine) {
 	routes.LinkRoutes(v1.Group("/link"))
 	routes.RoleRoutes(v1.Group("/role"))
 	routes.UserRoutes(v1.Group("/user"))
+	routes.AppRoutes(v1.Group("/app"))
 
 }
 
