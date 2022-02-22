@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"tiddly/src/middlewares"
 	"tiddly/src/models"
 	"tiddly/src/repositories"
 
@@ -10,27 +11,41 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type fileUpload struct {
-	original string
-	filename string
-	path     string
+type File struct {
+	File middlewares.FileUpload
 }
 
 func UpdateUserInfo(c *gin.Context) {
 	mongoClient := c.MustGet("mongoClient").(*mongo.Client)
-	// file := c.MustGet("file").(*fileUpload)
 	userId := c.MustGet("userId").(string)
 
 	userRepository := repositories.UserRepository(mongoClient)
 
-	userInfoRequest := models.UserInfo{}
-	if err := c.ShouldBindJSON(&userInfoRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Something went wrong"})
+	// Fetch User info
+	userInfo, err := userRepository.GetUser(userId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
 		return
 	}
 
-	userInfo := bson.M{"$set": bson.M{"user_info": userInfoRequest}}
-	_, err := userRepository.UpdateUserInfo(userId, userInfo)
+	userInfoRequest := models.UserInfo{}
+	if err := c.ShouldBind(&userInfoRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+
+	// Bind With File from Middleware
+	if value, exist := c.Get("file"); exist {
+		file := value.(*middlewares.FileUpload)
+		userInfoRequest.Image.Src = file.Path
+		userInfoRequest.Image.Title = file.Filename
+	} else {
+		userInfoRequest.Image.Src = userInfo.UserInfo.Image.Src
+		userInfoRequest.Image.Title = userInfo.UserInfo.Image.Title
+	}
+
+	userInfoNew := bson.M{"$set": bson.M{"user_info": userInfoRequest}}
+	_, err = userRepository.UpdateUserInfo(userId, userInfoNew)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Something went wrong during update user"})
 		return

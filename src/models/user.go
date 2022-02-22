@@ -7,15 +7,15 @@ import (
 )
 
 type image struct {
-	Src   string `bson:"src" json:"src,omitempty"`
-	Title string `bson:"title" json:"title,omitempty"`
+	Src   string `bson:"src" json:"src"`
+	Title string `bson:"title" json:"title"`
 }
 
 type UserInfo struct {
-	Firstname string `bson:"firstname" json:"firstname,omitempty"`
-	Lastname  string `bson:"lastname" json:"lastname,omitempty"`
-	Phone     string `bson:"phone" json:"phone,omitempty"`
-	Image     image  `bson:"image" json:"image,omitempty"`
+	Firstname string `bson:"firstname" form:"firstname,omitempty"`
+	Lastname  string `bson:"lastname" form:"lastname,omitempty"`
+	Phone     string `bson:"phone" form:"phone,omitempty"`
+	Image     image  `bson:"image"`
 }
 
 type User struct {

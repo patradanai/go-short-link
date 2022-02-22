@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -8,6 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
+
+type FileUpload struct {
+	Filename string
+	Path     string
+}
 
 func SaveFileUpload(imageField string) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -18,6 +24,7 @@ func SaveFileUpload(imageField string) gin.HandlerFunc {
 		}
 
 		files := form.File[imageField]
+		fmt.Println(len(files))
 		if len(files) > 0 {
 			for _, file := range files {
 				getUUid, err := gonanoid.New(9)
@@ -41,7 +48,7 @@ func SaveFileUpload(imageField string) gin.HandlerFunc {
 					return
 				}
 
-				c.Set("file", map[string]string{"original": file.Filename, "filename": fileName, "path": destFile})
+				c.Set("file", &FileUpload{Filename: fileName, Path: destFile})
 
 			}
 		}
